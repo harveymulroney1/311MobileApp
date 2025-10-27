@@ -2,12 +2,14 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager() {
-    const date = new Date();
+    
     
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
     
     const host = '10.45.1.14';
+    //MOBILE
+    //const host = '172.20.10.6';
     const [redStatus,setredStatus] = useState(Boolean);
     const [greenStatus,setgreenStatus] = useState(Boolean);
     const [blueStatus,setblueStatus] = useState(Boolean);
@@ -34,7 +36,7 @@ export default function deviceManager() {
                 
             });
     });
-    const fetchClimateData = ( async ()=> {
+    const fetchClimateData = ( () => {
         try{
             axios.get("http://" + host + "/getClimateData")
             .then(function (response){
@@ -42,8 +44,9 @@ export default function deviceManager() {
                 setTemp(arr[0]??"");
                 setHumidity(arr[1]??"");
                 setPressure(arr[2]??"");
-                console.log("Climate Data Fetched: ",response.data);
-                setlastUpdated(date.getHours() + ":" + date.getMinutes());
+                const now = new Date();
+                console.log("Climate Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
+                setlastUpdated(now.getHours() + ":" + now.getMinutes());
                 
             })
             .catch(function (error){
@@ -159,15 +162,15 @@ export default function deviceManager() {
                 <Text>Light Controller</Text>
                 <TouchableOpacity
                 onPress={()=>toggleRed()}
-                >Red ON</TouchableOpacity>
+                ><Text>Red ON</Text></TouchableOpacity>
                 <Text>Light Controller</Text>
                 <TouchableOpacity
                 onPress={()=>toggleGreen()}
-                >Green Toggle</TouchableOpacity>
+                ><Text>Green Toggle</Text></TouchableOpacity>
                 <Text>Light Controller</Text>
                 <TouchableOpacity
                 onPress={()=>toggleBlue()}
-                >Blue Toggle</TouchableOpacity>
+                ><Text>Blue Toggle</Text></TouchableOpacity>
             </View>
             <View>
                 <Text>Climate Data:</Text>
