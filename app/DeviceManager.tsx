@@ -1,13 +1,36 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-export default function deviceManager() {
+export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
+    const [host,setHost] = useState("");
+    //const host = '10.45.1.14';
     
-    const host = '10.45.1.14';
+    const device1 = '10.45.1.14';
+    const device2 = '10.45.1.15';
+    const device3 = '10.45.1.16';
+    useEffect(()=>
+    {
+        if(deviceID=="1")
+        {
+            setHost(device1);
+        }
+        else if(deviceID=="2")
+        {
+            setHost(device2);
+        }
+        else if(deviceID=="3")
+        {
+            setHost(device3);
+        }
+        else{
+            console.log("No Device ID Found");
+            setHost(device1); // default for testing *DEBUG*
+        }
+    },[])
     //MOBILE
     //const host = '172.20.10.6';
     const [redStatus,setredStatus] = useState(Boolean);
