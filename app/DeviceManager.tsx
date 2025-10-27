@@ -2,6 +2,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager() {
+    const date = new Date();
+    
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
     
@@ -41,6 +43,7 @@ export default function deviceManager() {
                 setHumidity(arr[1]??"");
                 setPressure(arr[2]??"");
                 console.log("Climate Data Fetched: ",response.data);
+                setlastUpdated(date.getHours() + ":" + date.getMinutes());
                 
             })
             .catch(function (error){
@@ -54,6 +57,7 @@ export default function deviceManager() {
             console.error("Error fetching climate data: ",error);
         }   
     });
+    
     useEffect(()=>
     {
         const interval = setInterval(()=>
