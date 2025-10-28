@@ -63,12 +63,23 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [C,setC] = useState("");
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
+    const [noiseLvl,setNoiseLvl] = useState("");
     useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
         setbatteryPercentage("53%");
     }
     ,[])
+    const fetchNoise = (()=>{
+        axios.get("http://" + host + "/getSoundLevel")
+        .then(function (response){
+            console.log("Noise Fetched: ",response.data);
+            setNoiseLvl(response.data);
+        })
+        .catch(function (error){
+            console.error("Error in fetching noise data: ",error);
+        });
+    });
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -255,6 +266,11 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <Text>C: {C}</Text>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchRGBCData()}>Fetch RGBC Data</Text>
+                </TouchableOpacity>
+
+                <Text>Noise Level: {noiseLvl} dB</Text>
+                <TouchableOpacity>
+                    <Text onPress={()=>fetchNoise()}>Fetch Noise Data</Text>
                 </TouchableOpacity>
             </View>
         </View>
