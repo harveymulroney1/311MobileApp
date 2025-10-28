@@ -7,7 +7,8 @@ export default function deviceManager() {
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
     
-    const host = '10.45.1.14';
+    //const host = '10.45.1.14';
+    const host = '192.168.0.50'; //Joe - changed to work on my wifi
     //MOBILE
     //const host = '172.20.10.6';
     const [redStatus,setredStatus] = useState(Boolean);
@@ -60,12 +61,25 @@ export default function deviceManager() {
             console.error("Error fetching climate data: ",error);
         }   
     });
+
+    const fetchBattery = (() => {
+        axios.get("http://" + host + "/getBattery")
+            .then(function (response) {
+                const now = new Date();
+                console.log("Battery Fetched:", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                setbatteryPercentage(response.data + "%");
+            })
+            .catch(function (error) {
+                console.error("Error fetching battery percentage: ", error);
+            });
+    });
     
     useEffect(()=>
     {
         const interval = setInterval(()=>
         {
             fetchClimateData();
+            fetchBattery();
         }
         ,60000);
         return () => clearInterval(interval);
