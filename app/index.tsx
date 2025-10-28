@@ -7,7 +7,11 @@ export default function Index() {
   return (
     <View>
       <View style={styles.deviceContainer}>
-          <TouchableOpacity style={styles.DeviceBtn} onPress={() => router.push("/DeviceManager")}>Device #1</TouchableOpacity>
+          <TouchableOpacity style={styles.DeviceBtn} onPress={() => router.push("/device/1")}><Text>Device #1</Text></TouchableOpacity>
+          <Text>Battery Percentage: 47%</Text>
+          <TouchableOpacity style={styles.DeviceBtn} onPress={() => router.push("/device/2")}><Text>Device #2</Text></TouchableOpacity>
+          <Text>Battery Percentage: 47%</Text>
+          <TouchableOpacity style={styles.DeviceBtn} onPress={() => router.push("/device/3")}><Text>Device #3</Text></TouchableOpacity>
           <Text>Battery Percentage: 47%</Text>
         </View>     
     </View>

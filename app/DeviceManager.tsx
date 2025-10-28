@@ -16,28 +16,51 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     {
         if(deviceID=="1")
         {
+            console.log("Device ID 1 selected");
             setHost(device1);
         }
         else if(deviceID=="2")
         {
+            console.log("Device ID 2 selected");
             setHost(device2);
         }
         else if(deviceID=="3")
         {
+            console.log("Device ID 3 selected");
             setHost(device3);
         }
         else{
             console.log("No Device ID Found");
             setHost(device1); // default for testing *DEBUG*
+            console.log("Host:",host, "Device1:",device1);
         }
-    },[])
+    },[]);
+    useEffect(() => {
+        console.log("Host updated:", host);
+    }, [host]);
+
+
+    useEffect(() => {
+        if (!deviceID) return;
+
+        if (deviceID === "1") setHost(device1);
+        else if (deviceID === "2") setHost(device2);
+        else if (deviceID === "3") setHost(device3);
+        else setHost(device1);
+
+    }, [deviceID]);
     //MOBILE
     //const host = '172.20.10.6';
     const [redStatus,setredStatus] = useState(Boolean);
     const [greenStatus,setgreenStatus] = useState(Boolean);
     const [blueStatus,setblueStatus] = useState(Boolean);
     const [climateData,setclimateData] = useState("");
+    const [rgbcData,setrgbcData] = useState("");
     const [temp,setTemp] = useState("");
+    const [R,setR] = useState("");
+    const [G,setG] = useState("");
+    const [B,setB] = useState("");
+    const [C,setC] = useState("");
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
     useEffect(()=>
@@ -61,6 +84,10 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     });
     const fetchClimateData = ( () => {
         try{
+            if(host.length<1){
+                console.log("Host not set yet");
+                return;
+            }
             axios.get("http://" + host + "/getClimateData")
             .then(function (response){
                 var arr = response.data.split(",");
@@ -82,6 +109,21 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         {
             console.error("Error fetching climate data: ",error);
         }   
+    });
+    const fetchRGBCData = (()=>{
+        axios.get("http://" + host + "/getRGBC")
+        .then(function (response){
+            console.log("RGBC Data Fetched: ",response.data);
+            setrgbcData(response.data);
+            var arr = response.data.split(",");
+            setR(arr[0]);
+            setG(arr[1]);
+            setB(arr[2]);
+            setC(arr[3]);
+        })
+        .catch(function (error){
+            console.error("Error in fetching RGBC data: ",error);
+        });
     });
     
     useEffect(()=>
@@ -205,6 +247,14 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+                <Text>RGBC Data:</Text>
+                <Text>R: {R}</Text>
+                <Text>G: {G}</Text>
+                <Text>B: {B}</Text>
+                <Text>C: {C}</Text>
+                <TouchableOpacity>
+                    <Text onPress={()=>fetchRGBCData()}>Fetch RGBC Data</Text>
                 </TouchableOpacity>
             </View>
         </View>
