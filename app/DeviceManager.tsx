@@ -170,7 +170,32 @@ export default function deviceManager() {
             <Text>Battery Percentage: {batteryPercentage}</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <View style={styles.btnContainer}>
-                <TouchableOpacity style={styles.safeModeBtn}>Safe Mode</TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/lowPowerModeOn")
+                            .then((response) => {
+                                console.log("Enable low power response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error enabling low power mode:", error);
+                            });
+                    }}>
+                    <Text style={styles.btnText}>Enable Low Power Mode</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/lowPowerModeOff")
+                            .then((response) => {
+                                console.log("Disable low power response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error disabling low power mode:", error);
+                            });
+                    }}>
+                    <Text style={styles.btnText}>Disable Low Power Mode</Text>
+                </TouchableOpacity>
             </View>
             <View>
                 <Text>Light Controller</Text>
