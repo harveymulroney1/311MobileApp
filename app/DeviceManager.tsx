@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager() {
@@ -18,6 +19,7 @@ export default function deviceManager() {
     const [temp,setTemp] = useState("");
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
+    const router = useRouter();
     useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
@@ -221,6 +223,18 @@ export default function deviceManager() {
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+            </View>
+            <View>
+                <TouchableOpacity
+                  onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourClimateData?zone=Zone%201`)}>
+                    <Text>View Climate Data Chart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourBatteryData?zone=Zone%201`)}>
+                    <Text>View Battery Chart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourMotionData?zone=Zone%201`)}>
+                    <Text>View Motion Chart</Text>
                 </TouchableOpacity>
             </View>
         </View>
