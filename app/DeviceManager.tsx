@@ -66,12 +66,24 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
     const [noiseLvl,setNoiseLvl] = useState("");
-    useEffect(()=>
+    /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
-        setbatteryPercentage("53%");
+        setbatteryPercentage("53");
     }
-    ,[])
+    ,[]) */
+    const getBattery = (()=>{
+        axios.get("http://" + host + "/getBattery")
+        .then(function (response){
+            console.log("Battery Fetched: ",response.data);
+            setbatteryPercentage(response.data);
+            const now = new Date
+            setlastUpdated(now.getHours() + ":" + now.getMinutes());
+        })
+        .catch(function (error){
+            console.error("Error in fetching battery data: ",error);
+        });
+    });
     const fetchNoise = (()=>{
         axios.get("http://" + host + "/getSoundLevel")
         .then(function (response){
@@ -98,10 +110,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in fetching hourly climate data: ",error);
         });
     });
-    useEffect(()=>{
-        console.log("Image URI updated:", imgUri);
-        console.log("Preview:", imgUri ? { uri: imgUri } : "No Image" );
-    },[imgUri]);
+    
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -164,11 +173,12 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         const interval = setInterval(()=>
         {
             fetchClimateData();
+            getBattery();
         }
         ,60000);
         return () => clearInterval(interval);
     }
-    ,[]);
+    ,[host]);
     const toggleRed = ( ()=> {
         if(redStatus == false)
         {
@@ -251,7 +261,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         
         <View>
             <Text>Hello this is the device Manager</Text>
-            <Text>Battery Percentage: {batteryPercentage}</Text>
+            <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <View style={styles.btnContainer}>
                 <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
@@ -293,6 +303,9 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Text onPress={()=>getBattery()}>Fetch Battery Percentage</Text>
                 </TouchableOpacity>
                 <Text>RGBC Data:</Text>
                 <Text>R: {R}</Text>
