@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
@@ -51,9 +52,10 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     }, [deviceID]);
     //MOBILE
     //const host = '172.20.10.6';
-    const [redStatus,setredStatus] = useState(Boolean);
-    const [greenStatus,setgreenStatus] = useState(Boolean);
-    const [blueStatus,setblueStatus] = useState(Boolean);
+    const [redStatus,setredStatus] = useState<boolean>(false);
+    const [imgUri, setImgUri] = useState<string | null>(null);
+    const [greenStatus,setgreenStatus] = useState<boolean>(false);
+    const [blueStatus,setblueStatus] = useState<boolean>(false);
     const [climateData,setclimateData] = useState("");
     const [rgbcData,setrgbcData] = useState("");
     const [temp,setTemp] = useState("");
@@ -80,6 +82,26 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in fetching noise data: ",error);
         });
     });
+    const getHourClimateData = (()=>{
+        axios.get(`http://127.0.0.1:5000/getHourClimateData?zone=Zone%20${deviceID}`,{responseType:"blob"} )
+        .then(async function (response){
+            console.log("Hourly Climate Data Fetched: ",response.data);
+            const blob = response.data;
+            const reader = new FileReader();
+            reader.onloadend = () => setImgUri(reader.result as string);
+            reader.readAsDataURL(blob);
+
+            
+
+        })
+        .catch(function (error){
+            console.error("Error in fetching hourly climate data: ",error);
+        });
+    });
+    useEffect(()=>{
+        console.log("Image URI updated:", imgUri);
+        console.log("Preview:", imgUri ? { uri: imgUri } : "No Image" );
+    },[imgUri]);
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -232,7 +254,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             <Text>Battery Percentage: {batteryPercentage}</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <View style={styles.btnContainer}>
-                <TouchableOpacity style={styles.safeModeBtn}>Safe Mode</TouchableOpacity>
+                <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
             </View>
             <View>
                 <Text>Light Controller</Text>
@@ -247,6 +269,19 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity
                 onPress={()=>toggleBlue()}
                 ><Text>Blue Toggle</Text></TouchableOpacity>
+            </View>
+            <View>
+                <TouchableOpacity onPress={()=>getHourClimateData()}>
+                    <Text>Get Last Hour Climate Data Graph</Text>
+                </TouchableOpacity>
+                {
+                    imgUri?(
+                        <Image source={{uri:imgUri}} style={{width:300,height:200}}/>
+                    )
+                    :(<Text>No Image Available</Text>
+                    )
+                }
+                
             </View>
             <View>
                 <Text>Climate Data:</Text>
