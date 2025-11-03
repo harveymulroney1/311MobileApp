@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
+
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager({deviceID}: {deviceID?: string}) {
     
@@ -66,6 +67,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
     const [noiseLvl,setNoiseLvl] = useState("");
+    const [lightLvl,setLightLvl] = useState("");
     /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
@@ -110,7 +112,16 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in fetching hourly climate data: ",error);
         });
     });
-    
+    const sanityCheck = (()=>{
+        axios.get("http://" + host + "/sanityCheck")
+        .then(function (response){
+            console.log("Sanity Check Response: ",response.data);
+            
+        })
+        .catch(function (error){
+            console.error("Error in Sanity Check: ",error);
+        });
+    });
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -134,8 +145,11 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             .then(function (response){
                 var arr = response.data.split(",");
                 setTemp(arr[0]??"");
-                setHumidity(arr[1]??"");
-                setPressure(arr[2]??"");
+                setNoiseLvl(arr[1]??"");
+                setLightLvl(arr[2]??"");
+                console.log("Temp:",arr[0],"Noise:",arr[1],"Light:",arr[2]);
+                //setHumidity(arr[1]??"");
+                //setPressure(arr[2]??"");
                 const now = new Date();
                 console.log("Climate Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
                 setlastUpdated(now.getHours() + ":" + now.getMinutes());
@@ -263,6 +277,10 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
+            <TouchableOpacity
+                onPress={()=>sanityCheck()}
+            ><Text>Check for Stale Data</Text></TouchableOpacity>
+            <Text>Light Controller</Text>
             <View style={styles.btnContainer}>
                 <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
             </View>
@@ -281,6 +299,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 ><Text>Blue Toggle</Text></TouchableOpacity>
             </View>
             <View>
+                
                 <TouchableOpacity onPress={()=>getHourClimateData()}>
                     <Text>Get Last Hour Climate Data Graph</Text>
                 </TouchableOpacity>
@@ -296,8 +315,8 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             <View>
                 <Text>Climate Data:</Text>
                 <Text>Temperature: {temp} °C</Text>
-                <Text>Humidity: {humidity} %</Text>
-                <Text>Pressure: {pressure} hPa</Text>
+                <Text>Noise Level: {noiseLvl}</Text>
+                <Text>Light Level: {lightLvl}</Text>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchTemp()}>Fetch Climate Data</Text>
                 </TouchableOpacity>
