@@ -14,7 +14,8 @@ export default function deviceManager() {
     //const host = '172.20.10.6';
     const [redStatus,setredStatus] = useState(Boolean);
     const [greenStatus,setgreenStatus] = useState(Boolean);
-    const [blueStatus,setblueStatus] = useState(Boolean);
+    const [blueStatus, setblueStatus] = useState(Boolean);
+    const [lowPowerMode, setLowPowerMode] = useState(false);
     const [climateData,setclimateData] = useState("");
     const [temp,setTemp] = useState("");
     const [humidity,setHumidity] = useState("");
@@ -75,18 +76,45 @@ export default function deviceManager() {
                 console.error("Error fetching battery percentage: ", error);
             });
     });
+
+    const fetchLowPower = () => {
+        axios.get("http://" + host + "/getLowPower")
+            .then((response) => {
+                const now = new Date();
+                console.log("Low Power Mode", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                if (response.data == true) {
+                    setLowPowerMode(true);
+                    console.log("setLowPowerMode has been changed to true");
+                }
+                else {
+                    setLowPowerMode(false);
+                    console.log("setLowPowerMode has been changed to false");
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching low power mode:", error);
+            });
+    };
     
     useEffect(()=>
     {
+        let intervalTime = 0;
+        if (lowPowerMode) {
+            intervalTime = 1800000;
+        }
+        else {
+            intervalTime = 60000;
+        }
         const interval = setInterval(()=>
         {
             fetchClimateData();
             fetchBattery();
+            fetchLowPower();
         }
-        ,60000);
+        ,intervalTime);
         return () => clearInterval(interval);
     }
-    ,[]);
+    ,[lowPowerMode]);
     const toggleRed = ( ()=> {
         if(redStatus == false)
         {
@@ -171,6 +199,7 @@ export default function deviceManager() {
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}</Text>
             <Text>Last Updated: {lastUpdated}</Text>
+            <Text>Low Power Mode: {lowPowerMode ? "Enabled" : "Disabled"}</Text>
             <View style={styles.btnContainer}>
                 <TouchableOpacity
                     style={styles.safeModeBtn}
@@ -182,6 +211,7 @@ export default function deviceManager() {
                             .catch((error) => {
                                 console.error("Error enabling low power mode:", error);
                             });
+                        fetchLowPower();
                     }}>
                     <Text style={styles.btnText}>Enable Low Power Mode</Text>
                 </TouchableOpacity>
@@ -195,8 +225,16 @@ export default function deviceManager() {
                             .catch((error) => {
                                 console.error("Error disabling low power mode:", error);
                             });
+                        fetchLowPower();
                     }}>
                     <Text style={styles.btnText}>Disable Low Power Mode</Text>
+                </TouchableOpacity>
+                                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Fetch low power status</Text>
                 </TouchableOpacity>
             </View>
             <View>
