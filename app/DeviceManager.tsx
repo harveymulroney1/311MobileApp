@@ -229,6 +229,34 @@ export default function deviceManager() {
                     }}>
                     <Text style={styles.btnText}>Disable Low Power Mode</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/autoLowPowerModeOn")
+                            .then((response) => {
+                                console.log("Enable automatic low power mode response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error enabling automatic low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Enable Automatic Power Saving</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/autoLowPowerModeOff")
+                            .then((response) => {
+                                console.log("Disable automatic low power mode response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error disabling automatic low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Disable Automatic Power Saving</Text>
+                </TouchableOpacity>
                                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
