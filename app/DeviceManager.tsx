@@ -84,16 +84,21 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         setbatteryPercentage("53");
     }
     ,[]) */
-    const getBattery = (()=>{
+    const getBattery = (() => {
         axios.get("http://" + host + "/getBattery")
-        .then(function (response){
-            console.log("Battery Fetched: ",response.data);
-            setbatteryPercentage(response.data);
-            const now = new Date
+        .then(function (response) {
+            console.log("Battery Fetched: ", response.data);
+            const arr = response.data.split(",");
+            if (arr.length > 1) {
+                setbatteryPercentage(arr[1]);
+            } else {
+                setbatteryPercentage(response.data);
+            }
+            const now = new Date();
             setlastUpdated(now.getHours() + ":" + now.getMinutes());
         })
-        .catch(function (error){
-            console.error("Error in fetching battery data: ",error);
+        .catch(function (error) {
+            console.error("Error in fetching battery data: ", error);
         });
     });
     const fetchNoise = (()=>{
@@ -145,36 +150,30 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 
             });
     });
-    const fetchClimateData = ( () => {
-        try{
-            if(host.length<1){
+    const fetchClimateData = (() => {
+        try {
+            if (host.length < 1) {
                 console.log("Host not set yet");
                 return;
             }
             axios.get("http://" + host + "/getClimateData")
-            .then(function (response){
-                var arr = response.data.split(",");
-                setTemp(arr[0]??"");
-                setNoiseLvl(arr[1]??"");
-                setLightLvl(arr[2]??"");
-                console.log("Temp:",arr[0],"Noise:",arr[1],"Light:",arr[2]);
-                //setHumidity(arr[1]??"");
-                //setPressure(arr[2]??"");
-                const now = new Date();
-                console.log("Climate Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
-                setlastUpdated(now.getHours() + ":" + now.getMinutes());
-                
-            })
-            .catch(function (error){
-                console.error("Error in fetching climate data: ",error);
-            });
-            
-            
+                .then(function (response) {
+                    var arr = response.data.split(",");
+                    setTemp(arr[1] ?? "");
+                    setNoiseLvl(arr[2] ?? "");
+                    setLightLvl(arr[3] ?? "");
+                    console.log("Temp:", arr[1], "Noise:", arr[2], "Light:", arr[3]);
+                    const now = new Date();
+                    console.log("Climate Data Fetched: ", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                    setlastUpdated(now.getHours() + ":" + now.getMinutes());
+                })
+                .catch(function (error) {
+                    console.error("Error in fetching climate data: ", error);
+                });
         }
-        catch(error)
-        {
-            console.error("Error fetching climate data: ",error);
-        }   
+        catch (error) {
+            console.error("Error fetching climate data: ", error);
+        }
     });
 
     const fetchBattery = (() => {
@@ -182,7 +181,12 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             .then(function (response) {
                 const now = new Date();
                 console.log("Battery Fetched:", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
-                setbatteryPercentage(response.data + "%");
+                const arr = response.data.split(",");
+                if (arr.length > 1) {
+                    setbatteryPercentage(arr[1]);
+                } else {
+                    setbatteryPercentage(response.data);
+                }
             })
             .catch(function (error) {
                 console.error("Error fetching battery percentage: ", error);
