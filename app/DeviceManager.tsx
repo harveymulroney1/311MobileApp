@@ -13,14 +13,14 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     //const host = '10.45.1.14';
     
     //const host = '10.45.1.14';
-    const host = '192.168.0.50'; //Joe - changed to work on my wifi
+    //const host = '192.168.0.50'; //Joe - changed to work on my wifi
     //MOBILE
     //const host = '172.20.10.6';
-    const [redStatus,setredStatus] = useState(Boolean);
-    const [greenStatus,setgreenStatus] = useState(Boolean);
-    const [blueStatus, setblueStatus] = useState(Boolean);
+    //const [redStatus,setredStatus] = useState(Boolean);
+    //const [greenStatus,setgreenStatus] = useState(Boolean);
+    //const [blueStatus, setblueStatus] = useState(Boolean);
     const [lowPowerMode, setLowPowerMode] = useState(false);
-    const device1 = '10.45.1.14';
+    const device1 = '192.168.0.50';
     const device2 = '10.45.1.15';
     const device3 = '10.45.1.16';
     useEffect(()=>
@@ -76,9 +76,8 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
     const router = useRouter();
-    useEffect(()=>
-    const [noiseLvl,setNoiseLvl] = useState("");
-    const [lightLvl,setLightLvl] = useState("");
+    const [noiseLvl, setNoiseLvl] = useState("");
+    const [lightLvl, setLightLvl] = useState("");
     /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
@@ -224,8 +223,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         });
     });
     
-    useEffect(()=>
-    {
+    useEffect(() => {
         let intervalTime = 0;
         if (lowPowerMode) {
             intervalTime = 1800000;
@@ -233,18 +231,16 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         else {
             intervalTime = 60000;
         }
-        const interval = setInterval(()=>
-        {
+        const interval = setInterval(() => {
             fetchClimateData();
             fetchBattery();
             fetchLowPower();
             getBattery();
         }
-        ,intervalTime);
+            , intervalTime);
         return () => clearInterval(interval);
     }
-    ,[lowPowerMode]);
-    ,[host]);
+        , [lowPowerMode]);
     const toggleRed = ( ()=> {
         if(redStatus == false)
         {
@@ -324,13 +320,12 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     }
     );
     return (
-        
         <View>
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <Text>Low Power Mode: {lowPowerMode ? "Enabled" : "Disabled"}</Text>
-            <View style={styles.btnContainer}>
+            <View>
                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
@@ -387,36 +382,34 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                     }}>
                     <Text style={styles.btnText}>Disable Automatic Power Saving</Text>
                 </TouchableOpacity>
-                                <TouchableOpacity
+                <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
                         fetchLowPower();
                     }}>
                     <Text style={styles.btnText}>Fetch low power status</Text>
                 </TouchableOpacity>
-            <TouchableOpacity
-                onPress={()=>sanityCheck()}
-            ><Text>Check for Stale Data</Text></TouchableOpacity>
-            <Text>Light Controller</Text>
-            <View style={styles.btnContainer}>
-                <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
+                <TouchableOpacity
+                    onPress={()=>sanityCheck()}
+                >
+                    <Text>Check for Stale Data</Text>
+                </TouchableOpacity>
             </View>
             <View>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleRed()}
-                ><Text>Red ON</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleRed()}>
+                    <Text>Red Toggle</Text>
+                </TouchableOpacity>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleGreen()}
-                ><Text>Green Toggle</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleGreen()}>
+                    <Text>Green Toggle</Text>
+                </TouchableOpacity>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleBlue()}
-                ><Text>Blue Toggle</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleBlue()}>
+                    <Text>Blue Toggle</Text>
+                </TouchableOpacity>
             </View>
             <View>
-                
                 <TouchableOpacity onPress={()=>getHourClimateData()}>
                     <Text>Get Last Hour Climate Data Graph</Text>
                 </TouchableOpacity>
@@ -427,34 +420,32 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                     :(<Text>No Image Available</Text>
                     )
                 }
-                
             </View>
             <View>
                 <Text>Climate Data:</Text>
                 <Text>Temperature: {temp} °C</Text>
                 <Text>Noise Level: {noiseLvl}</Text>
                 <Text>Light Level: {lightLvl}</Text>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchTemp()}>Fetch Climate Data</Text>
+                <TouchableOpacity onPress={()=>fetchTemp()}>
+                    <Text>Fetch Climate Data</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+                <TouchableOpacity onPress={()=>fetchClimateData()}>
+                    <Text>Fetch Full Climate Data</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text onPress={()=>getBattery()}>Fetch Battery Percentage</Text>
+                <TouchableOpacity onPress={()=>getBattery()}>
+                    <Text>Fetch Battery Percentage</Text>
                 </TouchableOpacity>
                 <Text>RGBC Data:</Text>
                 <Text>R: {R}</Text>
                 <Text>G: {G}</Text>
                 <Text>B: {B}</Text>
                 <Text>C: {C}</Text>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchRGBCData()}>Fetch RGBC Data</Text>
+                <TouchableOpacity onPress={()=>fetchRGBCData()}>
+                    <Text>Fetch RGBC Data</Text>
                 </TouchableOpacity>
-
                 <Text>Noise Level: {noiseLvl} dB</Text>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchNoise()}>Fetch Noise Data</Text>
+                <TouchableOpacity onPress={()=>fetchNoise()}>
+                    <Text>Fetch Noise Data</Text>
                 </TouchableOpacity>
             </View>
             <View>
@@ -470,7 +461,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }
 const styles = StyleSheet.create(
     {
@@ -480,19 +471,11 @@ const styles = StyleSheet.create(
             justifyContent:'center',
             borderRadius:14,
             paddingVertical:14,
-
         },
         btnText:{
             color:'#fff',
-            fontWeight:600,
+            fontWeight: '600',
             fontSize:16
         },
-        btnContainer:{
-            flex:1,
-            alignContent:'center',
-            justifyContent:'center',
-            paddingHorizontal: 24,
-
-        }
     }
 )
