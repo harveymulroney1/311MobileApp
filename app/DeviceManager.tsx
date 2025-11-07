@@ -1,12 +1,16 @@
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-export default function deviceManager() {
+
+
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
+    const [host,setHost] = useState("");
+    //const host = '10.45.1.14';
     
     //const host = '10.45.1.14';
     const host = '192.168.0.50'; //Joe - changed to work on my wifi
@@ -16,17 +20,119 @@ export default function deviceManager() {
     const [greenStatus,setgreenStatus] = useState(Boolean);
     const [blueStatus, setblueStatus] = useState(Boolean);
     const [lowPowerMode, setLowPowerMode] = useState(false);
+    const device1 = '10.45.1.14';
+    const device2 = '10.45.1.15';
+    const device3 = '10.45.1.16';
+    useEffect(()=>
+    {
+        if(deviceID=="1")
+        {
+            console.log("Device ID 1 selected");
+            setHost(device1);
+        }
+        else if(deviceID=="2")
+        {
+            console.log("Device ID 2 selected");
+            setHost(device2);
+        }
+        else if(deviceID=="3")
+        {
+            console.log("Device ID 3 selected");
+            setHost(device3);
+        }
+        else{
+            console.log("No Device ID Found");
+            setHost(device1); // default for testing *DEBUG*
+            console.log("Host:",host, "Device1:",device1);
+        }
+    },[]);
+    useEffect(() => {
+        console.log("Host updated:", host);
+    }, [host]);
+
+
+    useEffect(() => {
+        if (!deviceID) return;
+
+        if (deviceID === "1") setHost(device1);
+        else if (deviceID === "2") setHost(device2);
+        else if (deviceID === "3") setHost(device3);
+        else setHost(device1);
+
+    }, [deviceID]);
+    //MOBILE
+    //const host = '172.20.10.6';
+    const [redStatus,setredStatus] = useState<boolean>(false);
+    const [imgUri, setImgUri] = useState<string | null>(null);
+    const [greenStatus,setgreenStatus] = useState<boolean>(false);
+    const [blueStatus,setblueStatus] = useState<boolean>(false);
     const [climateData,setclimateData] = useState("");
+    const [rgbcData,setrgbcData] = useState("");
     const [temp,setTemp] = useState("");
+    const [R,setR] = useState("");
+    const [G,setG] = useState("");
+    const [B,setB] = useState("");
+    const [C,setC] = useState("");
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
     const router = useRouter();
     useEffect(()=>
+    const [noiseLvl,setNoiseLvl] = useState("");
+    const [lightLvl,setLightLvl] = useState("");
+    /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
-        setbatteryPercentage("53%");
+        setbatteryPercentage("53");
     }
-    ,[])
+    ,[]) */
+    const getBattery = (()=>{
+        axios.get("http://" + host + "/getBattery")
+        .then(function (response){
+            console.log("Battery Fetched: ",response.data);
+            setbatteryPercentage(response.data);
+            const now = new Date
+            setlastUpdated(now.getHours() + ":" + now.getMinutes());
+        })
+        .catch(function (error){
+            console.error("Error in fetching battery data: ",error);
+        });
+    });
+    const fetchNoise = (()=>{
+        axios.get("http://" + host + "/getSoundLevel")
+        .then(function (response){
+            console.log("Noise Fetched: ",response.data);
+            setNoiseLvl(response.data);
+        })
+        .catch(function (error){
+            console.error("Error in fetching noise data: ",error);
+        });
+    });
+    const getHourClimateData = (()=>{
+        axios.get(`http://127.0.0.1:5000/getHourClimateData?zone=Zone%20${deviceID}`,{responseType:"blob"} )
+        .then(async function (response){
+            console.log("Hourly Climate Data Fetched: ",response.data);
+            const blob = response.data;
+            const reader = new FileReader();
+            reader.onloadend = () => setImgUri(reader.result as string);
+            reader.readAsDataURL(blob);
+
+            
+
+        })
+        .catch(function (error){
+            console.error("Error in fetching hourly climate data: ",error);
+        });
+    });
+    const sanityCheck = (()=>{
+        axios.get("http://" + host + "/sanityCheck")
+        .then(function (response){
+            console.log("Sanity Check Response: ",response.data);
+            
+        })
+        .catch(function (error){
+            console.error("Error in Sanity Check: ",error);
+        });
+    });
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -42,12 +148,19 @@ export default function deviceManager() {
     });
     const fetchClimateData = ( () => {
         try{
+            if(host.length<1){
+                console.log("Host not set yet");
+                return;
+            }
             axios.get("http://" + host + "/getClimateData")
             .then(function (response){
                 var arr = response.data.split(",");
                 setTemp(arr[0]??"");
-                setHumidity(arr[1]??"");
-                setPressure(arr[2]??"");
+                setNoiseLvl(arr[1]??"");
+                setLightLvl(arr[2]??"");
+                console.log("Temp:",arr[0],"Noise:",arr[1],"Light:",arr[2]);
+                //setHumidity(arr[1]??"");
+                //setPressure(arr[2]??"");
                 const now = new Date();
                 console.log("Climate Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
                 setlastUpdated(now.getHours() + ":" + now.getMinutes());
@@ -95,6 +208,21 @@ export default function deviceManager() {
                 console.error("Error fetching low power mode:", error);
             });
     };
+    const fetchRGBCData = (()=>{
+        axios.get("http://" + host + "/getRGBC")
+        .then(function (response){
+            console.log("RGBC Data Fetched: ",response.data);
+            setrgbcData(response.data);
+            var arr = response.data.split(",");
+            setR(arr[0]);
+            setG(arr[1]);
+            setB(arr[2]);
+            setC(arr[3]);
+        })
+        .catch(function (error){
+            console.error("Error in fetching RGBC data: ",error);
+        });
+    });
     
     useEffect(()=>
     {
@@ -110,11 +238,13 @@ export default function deviceManager() {
             fetchClimateData();
             fetchBattery();
             fetchLowPower();
+            getBattery();
         }
         ,intervalTime);
         return () => clearInterval(interval);
     }
     ,[lowPowerMode]);
+    ,[host]);
     const toggleRed = ( ()=> {
         if(redStatus == false)
         {
@@ -197,7 +327,7 @@ export default function deviceManager() {
         
         <View>
             <Text>Hello this is the device Manager</Text>
-            <Text>Battery Percentage: {batteryPercentage}</Text>
+            <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <Text>Low Power Mode: {lowPowerMode ? "Enabled" : "Disabled"}</Text>
             <View style={styles.btnContainer}>
@@ -264,6 +394,12 @@ export default function deviceManager() {
                     }}>
                     <Text style={styles.btnText}>Fetch low power status</Text>
                 </TouchableOpacity>
+            <TouchableOpacity
+                onPress={()=>sanityCheck()}
+            ><Text>Check for Stale Data</Text></TouchableOpacity>
+            <Text>Light Controller</Text>
+            <View style={styles.btnContainer}>
+                <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
             </View>
             <View>
                 <Text>Light Controller</Text>
@@ -280,15 +416,45 @@ export default function deviceManager() {
                 ><Text>Blue Toggle</Text></TouchableOpacity>
             </View>
             <View>
+                
+                <TouchableOpacity onPress={()=>getHourClimateData()}>
+                    <Text>Get Last Hour Climate Data Graph</Text>
+                </TouchableOpacity>
+                {
+                    imgUri?(
+                        <Image source={{uri:imgUri}} style={{width:300,height:200}}/>
+                    )
+                    :(<Text>No Image Available</Text>
+                    )
+                }
+                
+            </View>
+            <View>
                 <Text>Climate Data:</Text>
                 <Text>Temperature: {temp} °C</Text>
-                <Text>Humidity: {humidity} %</Text>
-                <Text>Pressure: {pressure} hPa</Text>
+                <Text>Noise Level: {noiseLvl}</Text>
+                <Text>Light Level: {lightLvl}</Text>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchTemp()}>Fetch Climate Data</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Text onPress={()=>getBattery()}>Fetch Battery Percentage</Text>
+                </TouchableOpacity>
+                <Text>RGBC Data:</Text>
+                <Text>R: {R}</Text>
+                <Text>G: {G}</Text>
+                <Text>B: {B}</Text>
+                <Text>C: {C}</Text>
+                <TouchableOpacity>
+                    <Text onPress={()=>fetchRGBCData()}>Fetch RGBC Data</Text>
+                </TouchableOpacity>
+
+                <Text>Noise Level: {noiseLvl} dB</Text>
+                <TouchableOpacity>
+                    <Text onPress={()=>fetchNoise()}>Fetch Noise Data</Text>
                 </TouchableOpacity>
             </View>
             <View>
