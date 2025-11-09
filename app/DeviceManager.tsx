@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
 
+import TempMonitor from '@/components/TempMonitor';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager({deviceID}: {deviceID?: string}) {
     
@@ -144,14 +146,46 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             axios.get("http://" + host + "/getClimateData")
             .then(function (response){
                 var arr = response.data.split(",");
-                setTemp(arr[0]??"");
-                setNoiseLvl(arr[1]??"");
-                setLightLvl(arr[2]??"");
-                console.log("Temp:",arr[0],"Noise:",arr[1],"Light:",arr[2]);
+                setTemp(arr[1]??"");
+                setNoiseLvl(arr[2]??"");
+                setLightLvl(arr[3]??"");
+                console.log("Temp:",arr[1],"Noise:",arr[2],"Light:",arr[3]);
                 //setHumidity(arr[1]??"");
                 //setPressure(arr[2]??"");
                 const now = new Date();
                 console.log("Climate Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
+                setlastUpdated(now.getHours() + ":" + now.getMinutes());
+                
+            })
+            .catch(function (error){
+                console.error("Error in fetching climate data: ",error);
+            });
+            
+            
+        }
+        catch(error)
+        {
+            console.error("Error fetching climate data: ",error);
+        }   
+    });
+    const testBaseClimate = ( () => {
+        try{
+            if(host.length<1){
+                console.log("Host not set yet");
+                return;
+            }
+            let h = "10.45.1.13"
+            axios.get("http://" + h + "/getClimateData")
+            .then(function (response){
+                var arr = response.data.split(",");
+                setTemp(arr[1]??"");
+                setNoiseLvl(arr[2]??"");
+                setLightLvl(arr[3]??"");
+                console.log("Temp:",arr[1],"Noise:",arr[2],"Light:",arr[3]);
+                //setHumidity(arr[1]??"");
+                //setPressure(arr[2]??"");
+                const now = new Date();
+                console.log("TEST BASE Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
                 setlastUpdated(now.getHours() + ":" + now.getMinutes());
                 
             })
@@ -314,12 +348,26 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             </View>
             <View>
                 <Text>Climate Data:</Text>
+                <View style={styles.gaugeContainer}>
                 <Text>Temperature: {temp} °C</Text>
                 <Text>Noise Level: {noiseLvl}</Text>
                 <Text>Light Level: {lightLvl}</Text>
+                </View>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchTemp()}>Fetch Climate Data</Text>
                 </TouchableOpacity>
+                <TempMonitor Temperature={parseFloat(temp)}/>
+                <AnimatedCircularProgress
+                size={120}
+                width={15}
+                fill={batteryPercentage?parseInt(batteryPercentage):0}
+                tintColor="#00e0ff"
+                backgroundColor="#3d5875"
+                >
+                {()=>(
+                    <Text>Battery Percentage: {batteryPercentage}%</Text>
+                )}
+                </AnimatedCircularProgress>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
                 </TouchableOpacity>
@@ -339,6 +387,9 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity>
                     <Text onPress={()=>fetchNoise()}>Fetch Noise Data</Text>
                 </TouchableOpacity>
+                <TouchableOpacity>
+                    <Text onPress={()=>testBaseClimate()}>TEST BASE Fetch Full Climate Data</Text>
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -352,6 +403,13 @@ const styles = StyleSheet.create(
             borderRadius:14,
             paddingVertical:14,
 
+        },
+        gaugeContainer:{
+            alignItems:'center',
+            justifyContent:'center',
+            alignContent:'flex-start',
+            flexDirection:'row'
+            
         },
         btnText:{
             color:'#fff',
