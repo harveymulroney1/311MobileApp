@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
@@ -13,7 +14,15 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [host,setHost] = useState("");
     //const host = '10.45.1.14';
     
-    const device1 = '10.45.1.14';
+    //const host = '10.45.1.14';
+    //const host = '192.168.0.50'; //Joe - changed to work on my wifi
+    //MOBILE
+    //const host = '172.20.10.6';
+    //const [redStatus,setredStatus] = useState(Boolean);
+    //const [greenStatus,setgreenStatus] = useState(Boolean);
+    //const [blueStatus, setblueStatus] = useState(Boolean);
+    const [lowPowerMode, setLowPowerMode] = useState(false);
+    const device1 = '192.168.0.50';
     const device2 = '10.45.1.15';
     const device3 = '10.45.1.16';
     useEffect(()=>
@@ -68,24 +77,30 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [C,setC] = useState("");
     const [humidity,setHumidity] = useState("");
     const [pressure,setPressure] = useState("");
-    const [noiseLvl,setNoiseLvl] = useState("");
-    const [lightLvl,setLightLvl] = useState("");
+    const router = useRouter();
+    const [noiseLvl, setNoiseLvl] = useState("");
+    const [lightLvl, setLightLvl] = useState("");
     /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
         setbatteryPercentage("53");
     }
     ,[]) */
-    const getBattery = (()=>{
+    const getBattery = (() => {
         axios.get("http://" + host + "/getBattery")
-        .then(function (response){
-            console.log("Battery Fetched: ",response.data);
-            setbatteryPercentage(response.data);
-            const now = new Date
+        .then(function (response) {
+            console.log("Battery Fetched: ", response.data);
+            const arr = response.data.split(",");
+            if (arr.length > 1) {
+                setbatteryPercentage(arr[1]);
+            } else {
+                setbatteryPercentage(response.data);
+            }
+            const now = new Date();
             setlastUpdated(now.getHours() + ":" + now.getMinutes());
         })
-        .catch(function (error){
-            console.error("Error in fetching battery data: ",error);
+        .catch(function (error) {
+            console.error("Error in fetching battery data: ", error);
         });
     });
     const fetchNoise = (()=>{
@@ -137,9 +152,9 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 
             });
     });
-    const fetchClimateData = ( () => {
-        try{
-            if(host.length<1){
+    const fetchClimateData = (() => {
+        try {
+            if (host.length < 1) {
                 console.log("Host not set yet");
                 return;
             }
@@ -162,11 +177,25 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             });
             
             
+=======
+                .then(function (response) {
+                    var arr = response.data.split(",");
+                    setTemp(arr[1] ?? "");
+                    setNoiseLvl(arr[2] ?? "");
+                    setLightLvl(arr[3] ?? "");
+                    console.log("Temp:", arr[1], "Noise:", arr[2], "Light:", arr[3]);
+                    const now = new Date();
+                    console.log("Climate Data Fetched: ", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                    setlastUpdated(now.getHours() + ":" + now.getMinutes());
+                })
+                .catch(function (error) {
+                    console.error("Error in fetching climate data: ", error);
+                });
         }
-        catch(error)
-        {
-            console.error("Error fetching climate data: ",error);
-        }   
+        catch (error) {
+            console.error("Error fetching climate data: ", error);
+>>>>>>> 4dc9d33c1b619374733d97e0d9c8b2ee2064b4a3
+        }
     });
     const testBaseClimate = ( () => {
         try{
@@ -200,6 +229,42 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error fetching climate data: ",error);
         }   
     });
+
+    const fetchBattery = (() => {
+        axios.get("http://" + host + "/getBattery")
+            .then(function (response) {
+                const now = new Date();
+                console.log("Battery Fetched:", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                const arr = response.data.split(",");
+                if (arr.length > 1) {
+                    setbatteryPercentage(arr[1]);
+                } else {
+                    setbatteryPercentage(response.data);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error fetching battery percentage: ", error);
+            });
+    });
+
+    const fetchLowPower = () => {
+        axios.get("http://" + host + "/getLowPower")
+            .then((response) => {
+                const now = new Date();
+                console.log("Low Power Mode", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
+                if (response.data == true) {
+                    setLowPowerMode(true);
+                    console.log("setLowPowerMode has been changed to true");
+                }
+                else {
+                    setLowPowerMode(false);
+                    console.log("setLowPowerMode has been changed to false");
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching low power mode:", error);
+            });
+    };
     const fetchRGBCData = (()=>{
         axios.get("http://" + host + "/getRGBC")
         .then(function (response){
@@ -216,17 +281,24 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         });
     });
     
-    useEffect(()=>
-    {
-        const interval = setInterval(()=>
-        {
+    useEffect(() => {
+        let intervalTime = 0;
+        if (lowPowerMode) {
+            intervalTime = 1800000;
+        }
+        else {
+            intervalTime = 60000;
+        }
+        const interval = setInterval(() => {
             fetchClimateData();
+            fetchBattery();
+            fetchLowPower();
             getBattery();
         }
-        ,60000);
+            , intervalTime);
         return () => clearInterval(interval);
     }
-    ,[host]);
+        , [lowPowerMode]);
     const toggleRed = ( ()=> {
         if(redStatus == false)
         {
@@ -306,34 +378,96 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     }
     );
     return (
-        
         <View>
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
-            <TouchableOpacity
-                onPress={()=>sanityCheck()}
-            ><Text>Check for Stale Data</Text></TouchableOpacity>
-            <Text>Light Controller</Text>
-            <View style={styles.btnContainer}>
-                <TouchableOpacity style={styles.safeModeBtn}><Text>Safe Mode</Text></TouchableOpacity>
+            <Text>Low Power Mode: {lowPowerMode ? "Enabled" : "Disabled"}</Text>
+            <View>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/lowPowerModeOn")
+                            .then((response) => {
+                                console.log("Enable low power response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error enabling low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Enable Low Power Mode</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/lowPowerModeOff")
+                            .then((response) => {
+                                console.log("Disable low power response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error disabling low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Disable Low Power Mode</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/autoLowPowerModeOn")
+                            .then((response) => {
+                                console.log("Enable automatic low power mode response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error enabling automatic low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Enable Automatic Power Saving</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        axios.get("http://" + host + "/autoLowPowerModeOff")
+                            .then((response) => {
+                                console.log("Disable automatic low power mode response:", response.data);
+                            })
+                            .catch((error) => {
+                                console.error("Error disabling automatic low power mode:", error);
+                            });
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Disable Automatic Power Saving</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.safeModeBtn}
+                    onPress={() => {
+                        fetchLowPower();
+                    }}>
+                    <Text style={styles.btnText}>Fetch low power status</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={()=>sanityCheck()}
+                >
+                    <Text>Check for Stale Data</Text>
+                </TouchableOpacity>
             </View>
             <View>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleRed()}
-                ><Text>Red ON</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleRed()}>
+                    <Text>Red Toggle</Text>
+                </TouchableOpacity>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleGreen()}
-                ><Text>Green Toggle</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleGreen()}>
+                    <Text>Green Toggle</Text>
+                </TouchableOpacity>
                 <Text>Light Controller</Text>
-                <TouchableOpacity
-                onPress={()=>toggleBlue()}
-                ><Text>Blue Toggle</Text></TouchableOpacity>
+                <TouchableOpacity onPress={()=>toggleBlue()}>
+                    <Text>Blue Toggle</Text>
+                </TouchableOpacity>
             </View>
             <View>
-                
                 <TouchableOpacity onPress={()=>getHourClimateData()}>
                     <Text>Get Last Hour Climate Data Graph</Text>
                 </TouchableOpacity>
@@ -344,7 +478,6 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                     :(<Text>No Image Available</Text>
                     )
                 }
-                
             </View>
             <View>
                 <Text>Climate Data:</Text>
@@ -370,29 +503,46 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </AnimatedCircularProgress>
                 <TouchableOpacity>
                     <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
+=======
+                <TouchableOpacity onPress={()=>fetchTemp()}>
+                    <Text>Fetch Climate Data</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text onPress={()=>getBattery()}>Fetch Battery Percentage</Text>
+                <TouchableOpacity onPress={()=>fetchClimateData()}>
+                    <Text>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={()=>getBattery()}>
+                    <Text>Fetch Battery Percentage</Text>
                 </TouchableOpacity>
                 <Text>RGBC Data:</Text>
                 <Text>R: {R}</Text>
                 <Text>G: {G}</Text>
                 <Text>B: {B}</Text>
                 <Text>C: {C}</Text>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchRGBCData()}>Fetch RGBC Data</Text>
+                <TouchableOpacity onPress={()=>fetchRGBCData()}>
+                    <Text>Fetch RGBC Data</Text>
                 </TouchableOpacity>
-
                 <Text>Noise Level: {noiseLvl} dB</Text>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchNoise()}>Fetch Noise Data</Text>
+                <TouchableOpacity onPress={()=>fetchNoise()}>
+                    <Text>Fetch Noise Data</Text>
+                </TouchableOpacity>
+            </View>
+            <View>
+                <TouchableOpacity
+                  onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourClimateData?zone=Zone%201`)}>
+                    <Text>View Climate Data Chart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourBatteryData?zone=Zone%201`)}>
+                    <Text>View Battery Chart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourMotionData?zone=Zone%201`)}>
+                    <Text>View Motion Chart</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Text onPress={()=>testBaseClimate()}>TEST BASE Fetch Full Climate Data</Text>
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }
 const styles = StyleSheet.create(
     {
@@ -402,7 +552,6 @@ const styles = StyleSheet.create(
             justifyContent:'center',
             borderRadius:14,
             paddingVertical:14,
-
         },
         gaugeContainer:{
             alignItems:'center',
@@ -413,15 +562,8 @@ const styles = StyleSheet.create(
         },
         btnText:{
             color:'#fff',
-            fontWeight:600,
+            fontWeight: '600',
             fontSize:16
         },
-        btnContainer:{
-            flex:1,
-            alignContent:'center',
-            justifyContent:'center',
-            paddingHorizontal: 24,
-
-        }
     }
 )
