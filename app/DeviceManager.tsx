@@ -1,18 +1,18 @@
+import TempMonitor from '@/components/TempMonitor';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
 
-import TempMonitor from '@/components/TempMonitor';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
-    const [host,setHost] = useState("");
-    //const host = '10.45.1.14';
+    //const [host,setHost] = useState("");
+    const host = '10.45.1.13';
     
     //const host = '10.45.1.14';
     //const host = '192.168.0.50'; //Joe - changed to work on my wifi
@@ -22,10 +22,11 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     //const [greenStatus,setgreenStatus] = useState(Boolean);
     //const [blueStatus, setblueStatus] = useState(Boolean);
     const [lowPowerMode, setLowPowerMode] = useState(false);
-    const device1 = '192.168.0.50';
-    const device2 = '10.45.1.15';
-    const device3 = '10.45.1.16';
-    useEffect(()=>
+    const base = '10.45.1.13';
+    //const device1 = '10.45.1.14';
+    //const device2 = '10.45.1.15';
+    //const device3 = '10.45.1.16';
+    /*useEffect(()=>
     {
         if(deviceID=="1")
         {
@@ -47,19 +48,19 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             setHost(device1); // default for testing *DEBUG*
             console.log("Host:",host, "Device1:",device1);
         }
-    },[]);
-    useEffect(() => {
+    },[]);*/
+    /*useEffect(() => {
         console.log("Host updated:", host);
-    }, [host]);
+    }, [host]);*/
 
 
     useEffect(() => {
         if (!deviceID) return;
-
-        if (deviceID === "1") setHost(device1);
-        else if (deviceID === "2") setHost(device2);
-        else if (deviceID === "3") setHost(device3);
-        else setHost(device1);
+        //setHost(base);
+        //if (deviceID === "1") setHost(device1);
+        //else if (deviceID === "2") setHost(device2);
+        //else if (deviceID === "3") setHost(device3);
+        //else setHost(device1);
 
     }, [deviceID]);
     //MOBILE
@@ -153,7 +154,6 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             });
     });
     const fetchClimateData = (() => {
-        try {
             if (host.length < 1) {
                 console.log("Host not set yet");
                 return;
@@ -175,36 +175,17 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             .catch(function (error){
                 console.error("Error in fetching climate data: ",error);
             });
-            
-            
-=======
-                .then(function (response) {
-                    var arr = response.data.split(",");
-                    setTemp(arr[1] ?? "");
-                    setNoiseLvl(arr[2] ?? "");
-                    setLightLvl(arr[3] ?? "");
-                    console.log("Temp:", arr[1], "Noise:", arr[2], "Light:", arr[3]);
-                    const now = new Date();
-                    console.log("Climate Data Fetched: ", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
-                    setlastUpdated(now.getHours() + ":" + now.getMinutes());
-                })
-                .catch(function (error) {
-                    console.error("Error in fetching climate data: ", error);
-                });
-        }
-        catch (error) {
-            console.error("Error fetching climate data: ", error);
->>>>>>> 4dc9d33c1b619374733d97e0d9c8b2ee2064b4a3
-        }
-    });
+
+        });
+
     const testBaseClimate = ( () => {
         try{
             if(host.length<1){
                 console.log("Host not set yet");
                 return;
             }
-            let h = "10.45.1.13"
-            axios.get("http://" + h + "/getClimateData")
+            //let h = "10.45.1.13"
+            axios.get("http://" + host + "/getClimateData")
             .then(function (response){
                 var arr = response.data.split(",");
                 setTemp(arr[1]??"");
@@ -231,7 +212,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     });
 
     const fetchBattery = (() => {
-        axios.get("http://" + host + "/getBattery")
+        axios.get("http://" + host + "/getBattery/"+deviceID)
             .then(function (response) {
                 const now = new Date();
                 console.log("Battery Fetched:", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
@@ -293,7 +274,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             fetchClimateData();
             fetchBattery();
             fetchLowPower();
-            getBattery();
+            //getBattery();
         }
             , intervalTime);
         return () => clearInterval(interval);
@@ -501,16 +482,13 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                     <Text>Battery Percentage: {batteryPercentage}%</Text>
                 )}
                 </AnimatedCircularProgress>
-                <TouchableOpacity>
-                    <Text onPress={()=>fetchClimateData()}>Fetch Full Climate Data</Text>
-=======
                 <TouchableOpacity onPress={()=>fetchTemp()}>
                     <Text>Fetch Climate Data</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>fetchClimateData()}>
                     <Text>Fetch Full Climate Data</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>getBattery()}>
+                <TouchableOpacity onPress={()=>fetchBattery()}>
                     <Text>Fetch Battery Percentage</Text>
                 </TouchableOpacity>
                 <Text>RGBC Data:</Text>
@@ -520,6 +498,9 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <Text>C: {C}</Text>
                 <TouchableOpacity onPress={()=>fetchRGBCData()}>
                     <Text>Fetch RGBC Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Text onPress={()=>testBaseClimate()}>TEST BASE Fetch Full Climate Data</Text>
                 </TouchableOpacity>
                 <Text>Noise Level: {noiseLvl} dB</Text>
                 <TouchableOpacity onPress={()=>fetchNoise()}>
@@ -537,9 +518,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity onPress={() => router.push(`/ImageDisplay?url=http://127.0.0.1:5000/getHourMotionData?zone=Zone%201`)}>
                     <Text>View Motion Chart</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text onPress={()=>testBaseClimate()}>TEST BASE Fetch Full Climate Data</Text>
-                </TouchableOpacity>
+
             </View>
         </View>
     );
