@@ -11,7 +11,6 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
     const [lastUpdated,setlastUpdated] = useState("");
-    const [zone,setZone] = useState(Number)
     const [batteryPercentage,setbatteryPercentage] = useState("");
     const [zone, setZone] = useState<number | null>(null);
     //const [host,setHost] = useState("");
@@ -161,10 +160,11 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     });
     const getZone = (()=>{
         let rssi_ip = "10.32.177.69:5000";
-        axios.get("http://" + rssi_ip + "/getRSSI")
+        axios.get("http://" + rssi_ip + "/getZone?device=PicoScanner")
             .then(function (response){
-                
-                console.log(response.data);
+            
+            //setlastUpdated(response.data.timestamp);
+            console.log(response.data);
                 if(response.data == "Zone 1")
                 {
                     setZone(1);
@@ -306,17 +306,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         });
     });
 
-    const fetchZone = () => {
-        axios.get("http://<FLASK_SERVER_IP>:5000/getZone?device=PicoScanner")
-        .then((response) => {
-            console.log("Zone Fetched:", response.data);
-            setZone(response.data.zone);
-            setlastUpdated(response.data.timestamp);
-        })
-        .catch((error) => {
-            console.error("Error fetching zone:", error);
-        });
-    };
+
     
     useEffect(() => {
         let intervalTime = 0;
@@ -330,7 +320,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             fetchClimateData();
             fetchBattery();
             fetchLowPower();
-            fetchZone();
+            getZone();
             //getBattery();
         }
             , intervalTime);
@@ -491,6 +481,11 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 >
                     <Text>Check for Stale Data</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={()=>getZone()}
+                >
+                    <Text>Get Zone</Text>
+                </TouchableOpacity>
             </View>
             <View>
                             <TouchableOpacity onPress={()=>fetchClimateData()}>
@@ -499,6 +494,26 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity onPress={()=>fetchBattery()}>
                     <Text>Fetch Battery Percentage</Text>
                 </TouchableOpacity>
+                <View style={styles.container}>
+                    {[1, 2, 3].map((z) => (
+                        <View
+                        key={z}
+                        style={[
+                            styles.square,
+                            zone === z ? styles.active : styles.inactive,
+                        ]}
+                        >
+                        <Text
+                            style={[
+                            styles.text,
+                            zone === z ? styles.activeText : styles.inactiveText,
+                            ]}
+                        >
+                            Zone {z}
+                        </Text>
+                        </View>
+                    ))}
+                    </View>
                 <Text>Light Controller</Text>
                 <TouchableOpacity onPress={()=>toggleRed()}>
                     <Text>Red Toggle</Text>
@@ -598,6 +613,37 @@ const styles = StyleSheet.create(
             flexDirection:'row'
             
         },
+        container: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 20,
+  },
+  square: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  active: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
+  },
+  inactive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#BDBDBD',
+  },
+  text: {
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  activeText: {
+    color: '#FFFFFF',
+  },
+  inactiveText: {
+    color: '#424242',
+  },
         btnText:{
             color:'#fff',
             fontWeight: '600',
