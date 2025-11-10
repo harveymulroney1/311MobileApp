@@ -12,8 +12,8 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
     //const [host,setHost] = useState("");
-    const host = '10.45.1.13';
-    
+    //const host = '10.45.1.13';
+    const host = '192.168.137.5';
     //const host = '10.45.1.14';
     //const host = '192.168.0.50'; //Joe - changed to work on my wifi
     //MOBILE
@@ -435,6 +435,12 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </TouchableOpacity>
             </View>
             <View>
+                            <TouchableOpacity onPress={()=>fetchClimateData()}>
+                    <Text>Fetch Full Climate Data</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={()=>fetchBattery()}>
+                    <Text>Fetch Battery Percentage</Text>
+                </TouchableOpacity>
                 <Text>Light Controller</Text>
                 <TouchableOpacity onPress={()=>toggleRed()}>
                     <Text>Red Toggle</Text>
@@ -485,12 +491,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity onPress={()=>fetchTemp()}>
                     <Text>Fetch Climate Data</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>fetchClimateData()}>
-                    <Text>Fetch Full Climate Data</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>fetchBattery()}>
-                    <Text>Fetch Battery Percentage</Text>
-                </TouchableOpacity>
+
                 <Text>RGBC Data:</Text>
                 <Text>R: {R}</Text>
                 <Text>G: {G}</Text>
