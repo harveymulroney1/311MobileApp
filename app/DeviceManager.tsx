@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
 
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     
     const [lastUpdated,setlastUpdated] = useState("");
+    const [zone,setZone] = useState(Number)
     const [batteryPercentage,setbatteryPercentage] = useState("");
     //const [host,setHost] = useState("");
     //const host = '10.45.1.13';
@@ -130,6 +132,22 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in fetching hourly climate data: ",error);
         });
     });
+        const getRSSIHourly = (()=>{
+        axios.get(`http://127.0.0.1:5000/getHourRSSIData`,{responseType:"blob"} )
+        .then(async function (response){
+            console.log("Hourly Climate Data Fetched: ",response.data);
+            const blob = response.data;
+            const reader = new FileReader();
+            reader.onloadend = () => setImgUri(reader.result as string);
+            reader.readAsDataURL(blob);
+
+            
+
+        })
+        .catch(function (error){
+            console.error("Error in fetching hourly climate data: ",error);
+        });
+    });
     const sanityCheck = (()=>{
         axios.get("http://" + host + "/sanityCheck")
         .then(function (response){
@@ -140,6 +158,31 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in Sanity Check: ",error);
         });
     });
+    const getZone = (()=>{
+        let rssi_ip = "10.32.177.69:5000";
+        axios.get("http://" + rssi_ip + "/getRSSI")
+            .then(function (response){
+                
+                console.log(response.data);
+                if(response.data == "Zone 1")
+                {
+                    setZone(1);
+                }
+                else if (response.data=="Zone 2")
+                {
+                    setZone(2);
+                }
+                else if(response.data=="Zone 3")
+                {
+                    setZone(3);
+                }
+                
+            })
+            .catch(function (error){
+                console.error("Error in fetching zone: ",error);
+                
+            });
+    })
     const fetchTemp = (()=>{
             axios.get("http://" + host + "/getTemp")
             .then(function (response){
@@ -359,7 +402,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     }
     );
     return (
-        <View>
+        <ScrollView>
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
@@ -521,7 +564,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 </TouchableOpacity>
 
             </View>
-        </View>
+        </ScrollView>
     );
 }
 const styles = StyleSheet.create(
