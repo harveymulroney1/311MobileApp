@@ -11,6 +11,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     
     const [lastUpdated,setlastUpdated] = useState("");
     const [batteryPercentage,setbatteryPercentage] = useState("");
+    const [zone, setZone] = useState<number | null>(null);
     //const [host,setHost] = useState("");
     const host = '10.45.1.13';
     
@@ -261,6 +262,18 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.error("Error in fetching RGBC data: ",error);
         });
     });
+
+    const fetchZone = () => {
+        axios.get("http://<FLASK_SERVER_IP>:5000/getZone?device=PicoScanner")
+        .then((response) => {
+            console.log("Zone Fetched:", response.data);
+            setZone(response.data.zone);
+            setlastUpdated(response.data.timestamp);
+        })
+        .catch((error) => {
+            console.error("Error fetching zone:", error);
+        });
+    };
     
     useEffect(() => {
         let intervalTime = 0;
@@ -274,6 +287,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             fetchClimateData();
             fetchBattery();
             fetchLowPower();
+            fetchZone();
             //getBattery();
         }
             , intervalTime);
@@ -364,6 +378,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             <Text>Battery Percentage: {batteryPercentage}%</Text>
             <Text>Last Updated: {lastUpdated}</Text>
             <Text>Low Power Mode: {lowPowerMode ? "Enabled" : "Disabled"}</Text>
+            <Text>Current Zone: {zone !== null ? zone : "No data yet"}</Text>
             <View>
                 <TouchableOpacity
                     style={styles.safeModeBtn}
