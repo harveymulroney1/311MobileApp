@@ -1,9 +1,6 @@
-import TempMonitor from "@/components/TempMonitor";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
-
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function deviceManager({deviceID}: {deviceID?: string}) {
@@ -430,8 +427,139 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
           console.error("error turning OFF BLUE: ", error);
         });
     }
+  };
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Zone {deviceID} Manager</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Status</Text>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Battery:</Text>
+          <Text style={styles.dataValue}>{batteryPercentage}%</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Last Updated:</Text>
+          <Text style={styles.dataValue}>{lastUpdated}</Text>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={() => sanityCheck()}>
+          <Text style={styles.buttonText}>Check for Stale Data</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonSecondary}
+          onPress={() => getBattery()}
+        >
+          <Text style={styles.buttonTextSecondary}>Refresh Battery</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Climate Data</Text>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Temperature:</Text>
+          <Text style={styles.dataValue}>{temp} °C</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Noise Level:</Text>
+          <Text style={styles.dataValue}>{noiseLvl} dB</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Light Level:</Text>
+          <Text style={styles.dataValue}>{lightLvl}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.buttonSecondary}
+          onPress={() => fetchClimateData()}
+        >
+          <Text style={styles.buttonTextSecondary}>Refresh Climate</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Last Hour Graph</Text>
+        {imgUri ? (
+          <Image source={{ uri: imgUri }} style={styles.graphImage} />
+        ) : (
+          <Text style={styles.placeholderText}>No Image Available</Text>
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => getHourClimateData()}
+        >
+          <Text style={styles.buttonText}>Load Graph</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.card}>
+
+   
+        <View style={styles.Zonecontainer}>
+                    {[1, 2, 3].map((z) => (
+                        <View
+                        key={z}
+                        style={[
+                            styles.square,
+                            zone === z ? styles.active : styles.inactive,
+                        ]}
+                        >
+                        <Text
+                            style={[
+                            styles.text,
+                            zone === z ? styles.activeText : styles.inactiveText,
+                            ]}
+                        >
+                            Zone {z}
+                        </Text>
+                        </View>
+                    ))}
+                    </View>
+                <TouchableOpacity style={styles.button}
+                    onPress={()=>getZone()}
+                >
+                    <Text style={styles.buttonText}>Get Zone</Text>
+                </TouchableOpacity>
+        </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Light Controller</Text>
+        <TouchableOpacity style={styles.buttonRed} onPress={() => toggleRed()}>
+          <Text style={styles.buttonText}>Toggle Red</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => toggleGreen()}>
+          <Text style={styles.buttonText}>Toggle Green</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => toggleBlue()}>
+          <Text style={styles.buttonText}>Toggle Blue</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>RGBC Data</Text>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Red:</Text>
+          <Text style={styles.dataValue}>{R}</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Green:</Text>
+          <Text style={styles.dataValue}>{G}</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Blue:</Text>
+          <Text style={styles.dataValue}>{B}</Text>
+        </View>
+        <View style={styles.dataRow}>
+          <Text style={styles.dataLabel}>Clear:</Text>
+          <Text style={styles.dataValue}>{C}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.buttonSecondary}
+          onPress={() => fetchRGBCData()}
+        >
+          <Text style={styles.buttonTextSecondary}>Refresh RGBC</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
     };
-    return (
+    /*return (
         <ScrollView>
             <Text>Hello this is the device Manager</Text>
             <Text>Battery Percentage: {batteryPercentage}%</Text>
@@ -622,9 +750,98 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             </View>
         </ScrollView>
     );
-}
-const styles = StyleSheet.create(
-    {
+}*/
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f0f2f5",
+    padding: 16,
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#111",
+    marginBottom: 12,
+  },
+  dataRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  dataLabel: {
+    fontSize: 16,
+    color: "#555",
+  },
+  dataValue: {
+    fontSize: 16,
+    color: "#111",
+    fontWeight: "500",
+  },
+  button: {
+    backgroundColor: "#3b82f6",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  buttonSecondary: {
+    backgroundColor: "#e5e7eb",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonTextSecondary: {
+    color: "#111",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  buttonRed: {
+    backgroundColor: "#ef4444",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 8,
+  },
+  graphImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: "#eee",
+    resizeMode: "contain",
+  },
+  placeholderText: {
+    textAlign: "center",
+    color: "#888",
+    marginVertical: 40,
+  },
+
         safeModeBtn:{
             backgroundColor:'red',
             paddingHorizontal:22,
@@ -639,7 +856,7 @@ const styles = StyleSheet.create(
             flexDirection:'row'
             
         },
-        container: {
+        Zonecontainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginVertical: 20,
@@ -677,4 +894,4 @@ const styles = StyleSheet.create(
             fontSize:16
         },
     }
-)
+);

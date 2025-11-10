@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
+import React from "react";
 import { Image, View } from "react-native";
 
 export default function ImageDisplay() {
