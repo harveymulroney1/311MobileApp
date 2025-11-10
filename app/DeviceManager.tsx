@@ -1,9 +1,8 @@
-import TempMonitor from '@/components/TempMonitor';
-import axios from 'axios';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { AnimatedCircularProgress } from 'react-native-circular-progress';
-
+import TempMonitor from "@/components/TempMonitor";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { AnimatedCircularProgress } from "react-native-circular-progress";
 
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -51,39 +50,37 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
             console.log("Host:",host, "Device1:",device1);
         }
     },[]);*/
-    /*useEffect(() => {
+  /*useEffect(() => {
         console.log("Host updated:", host);
     }, [host]);*/
 
-
-    useEffect(() => {
-        if (!deviceID) return;
-        //setHost(base);
-        //if (deviceID === "1") setHost(device1);
-        //else if (deviceID === "2") setHost(device2);
-        //else if (deviceID === "3") setHost(device3);
-        //else setHost(device1);
-
-    }, [deviceID]);
-    //MOBILE
-    //const host = '172.20.10.6';
-    const [redStatus,setredStatus] = useState<boolean>(false);
-    const [imgUri, setImgUri] = useState<string | null>(null);
-    const [greenStatus,setgreenStatus] = useState<boolean>(false);
-    const [blueStatus,setblueStatus] = useState<boolean>(false);
-    const [climateData,setclimateData] = useState("");
-    const [rgbcData,setrgbcData] = useState("");
-    const [temp,setTemp] = useState("");
-    const [R,setR] = useState("");
-    const [G,setG] = useState("");
-    const [B,setB] = useState("");
-    const [C,setC] = useState("");
-    const [humidity,setHumidity] = useState("");
-    const [pressure,setPressure] = useState("");
-    const router = useRouter();
-    const [noiseLvl, setNoiseLvl] = useState("");
-    const [lightLvl, setLightLvl] = useState("");
-    /* useEffect(()=>
+  useEffect(() => {
+    if (!deviceID) return;
+    //setHost(base);
+    //if (deviceID === "1") setHost(device1);
+    //else if (deviceID === "2") setHost(device2);
+    //else if (deviceID === "3") setHost(device3);
+    //else setHost(device1);
+  }, [deviceID]);
+  //MOBILE
+  //const host = '172.20.10.6';
+  const [redStatus, setredStatus] = useState<boolean>(false);
+  const [imgUri, setImgUri] = useState<string | null>(null);
+  const [greenStatus, setgreenStatus] = useState<boolean>(false);
+  const [blueStatus, setblueStatus] = useState<boolean>(false);
+  const [climateData, setclimateData] = useState("");
+  const [rgbcData, setrgbcData] = useState("");
+  const [temp, setTemp] = useState("");
+  const [R, setR] = useState("");
+  const [G, setG] = useState("");
+  const [B, setB] = useState("");
+  const [C, setC] = useState("");
+  const [humidity, setHumidity] = useState("");
+  const [pressure, setPressure] = useState("");
+  const router = useRouter();
+  const [noiseLvl, setNoiseLvl] = useState("");
+  const [lightLvl, setLightLvl] = useState("");
+  /* useEffect(()=>
     {
         setlastUpdated("14 Minutes Ago");
         setbatteryPercentage("53");
@@ -222,38 +219,38 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
 
         });
 
-    const testBaseClimate = ( () => {
-        try{
-            if(host.length<1){
-                console.log("Host not set yet");
-                return;
-            }
-            //let h = "10.45.1.13"
-            axios.get("http://" + host + "/getClimateData")
-            .then(function (response){
-                var arr = response.data.split(",");
-                setTemp(arr[1]??"");
-                setNoiseLvl(arr[2]??"");
-                setLightLvl(arr[3]??"");
-                console.log("Temp:",arr[1],"Noise:",arr[2],"Light:",arr[3]);
-                //setHumidity(arr[1]??"");
-                //setPressure(arr[2]??"");
-                const now = new Date();
-                console.log("TEST BASE Data Fetched: ",response.data, "Time:",now.getHours() + ":" + now.getMinutes());
-                setlastUpdated(now.getHours() + ":" + now.getMinutes());
-                
-            })
+  const testBaseClimate = () => {
+
+      if (host.length < 1) {
+        console.log("Host not set yet");
+        return;
+      }
+      //let h = "10.45.1.13"
+      axios
+        .get("http://" + host + "/getClimateData")
+        .then(function (response) {
+          var arr = response.data.split(",");
+          setTemp(arr[1] ?? "");
+          setNoiseLvl(arr[2] ?? "");
+          setLightLvl(arr[3] ?? "");
+          console.log("Temp:", arr[1], "Noise:", arr[2], "Light:", arr[3]);
+          //setHumidity(arr[1]??"");
+          //setPressure(arr[2]??"");
+          const now = new Date();
+          console.log(
+            "TEST BASE Data Fetched: ",
+            response.data,
+            "Time:",
+            now.getHours() + ":" + now.getMinutes()
+          );
+          setlastUpdated(now.getHours() + ":" + now.getMinutes());
+        })
             .catch(function (error){
                 console.error("Error in fetching climate data: ",error);
             });
             
-            
-        }
-        catch(error)
-        {
-            console.error("Error fetching climate data: ",error);
-        }   
-    });
+        
+    };
 
     const fetchBattery = (() => {
         axios.get("http://" + host + "/getBattery/"+deviceID)
@@ -267,7 +264,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                     setbatteryPercentage(response.data);
                 }
             })
-            .catch(function (error) {
+        .catch(function (error) {
                 console.error("Error fetching battery percentage: ", error);
             });
     });
@@ -327,84 +324,113 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
         return () => clearInterval(interval);
     }
         , [lowPowerMode]);
-    const toggleRed = ( ()=> {
-        if(redStatus == false)
-        {
-            axios.get("http://" + host +"/redON")
-            .then(function (response){
 
-            
-                console.log("Setting Red ON");
-            })
-            .catch(function(error){
-                console.error("error turning on RED: ",error);
-            })
-            
-            setredStatus(true);
-        }
-        else{
-            axios.get("http://" + host +"/redOFF")
-        .then(function(response)
-        {
-            console.log("Setting Red OFF");
-            setredStatus(false);
-        })
-        .catch(function(error){
-            
-            setredStatus(false);
-            console.error("error turning OFF red: ",error);
-        })
-        }
-    }
-    );
-    const toggleGreen = ( ()=> {
-        if(greenStatus == false)
-        {
-            axios.get("http://" + host +"/greenON")
-            .then(function(response){
-                console.log("Setting Green ON");
-                
-            }
-            ).catch(function(error){
-                console.error("error turning on GREEN: ",error);
-            });
-            setgreenStatus(true);
-        }
-        else{
-            axios.get("http://" + host +"/greenOFF").then(function(response){
-                console.log("Setting Green OFF");
-                setgreenStatus(false);
-            }).catch(function(error){
-                console.error("error turning OFF GREEN: ",error);
-                setgreenStatus(false);
-            });
-        }
-    }
-    );
-        const toggleBlue = ( ()=> {
-        if(blueStatus == false)
-        {
-            axios.get("http://" + host +"/blueON").then(function(response){
-                console.log("Setting Blue ON");
-            }).catch(function(error){
-                console.error("error turning on BLUE: ",error);
-                
-            });
-            console.log("Setting Blue ON");
-            setblueStatus(true);
-        }
-        else{
-            axios.get("http://" + host +"/blueOFF").then(function(response){
-                console.log("Setting Blue OFF");
-                setblueStatus(false);
-            }).catch(function(error){
-                setblueStatus(false);
-                console.error("error turning OFF BLUE: ",error);
-            });
 
-        }
+
+
+  const fetchZone = () => {
+    axios
+      .get("http://<FLASK_SERVER_IP>:5000/getZone?device=PicoScanner")
+      .then((response) => {
+        console.log("Zone Fetched:", response.data);
+        setZone(response.data.zone);
+        setlastUpdated(response.data.timestamp);
+      })
+      .catch((error) => {
+        console.error("Error fetching zone:", error);
+      });
+  };
+
+  useEffect(() => {
+    let intervalTime = 0;
+    if (lowPowerMode) {
+      intervalTime = 1800000;
+    } else {
+      intervalTime = 60000;
     }
-    );
+    const interval = setInterval(() => {
+      fetchClimateData();
+      fetchBattery();
+      fetchLowPower();
+      fetchZone();
+      //getBattery();
+    }, intervalTime);
+    return () => clearInterval(interval);
+  }, [lowPowerMode]);
+  const toggleRed = () => {
+    if (redStatus == false) {
+      axios
+        .get("http://" + host + "/redON")
+        .then(function (response) {
+          console.log("Setting Red ON");
+        })
+        .catch(function (error) {
+          console.error("error turning on RED: ", error);
+        });
+
+      setredStatus(true);
+    } else {
+      axios
+        .get("http://" + host + "/redOFF")
+        .then(function (response) {
+          console.log("Setting Red OFF");
+          setredStatus(false);
+        })
+        .catch(function (error) {
+          setredStatus(false);
+          console.error("error turning OFF red: ", error);
+        });
+    }
+  };
+  const toggleGreen = () => {
+    if (greenStatus == false) {
+      axios
+        .get("http://" + host + "/greenON")
+        .then(function (response) {
+          console.log("Setting Green ON");
+        })
+        .catch(function (error) {
+          console.error("error turning on GREEN: ", error);
+        });
+      setgreenStatus(true);
+    } else {
+      axios
+        .get("http://" + host + "/greenOFF")
+        .then(function (response) {
+          console.log("Setting Green OFF");
+          setgreenStatus(false);
+        })
+        .catch(function (error) {
+          console.error("error turning OFF GREEN: ", error);
+          setgreenStatus(false);
+        });
+    }
+  };
+  const toggleBlue = () => {
+    if (blueStatus == false) {
+      axios
+        .get("http://" + host + "/blueON")
+        .then(function (response) {
+          console.log("Setting Blue ON");
+        })
+        .catch(function (error) {
+          console.error("error turning on BLUE: ", error);
+        });
+      console.log("Setting Blue ON");
+      setblueStatus(true);
+    } else {
+      axios
+        .get("http://" + host + "/blueOFF")
+        .then(function (response) {
+          console.log("Setting Blue OFF");
+          setblueStatus(false);
+        })
+        .catch(function (error) {
+          setblueStatus(false);
+          console.error("error turning OFF BLUE: ", error);
+        });
+    }
+    };
     return (
         <ScrollView>
             <Text>Hello this is the device Manager</Text>
@@ -641,6 +667,7 @@ const styles = StyleSheet.create(
   activeText: {
     color: '#FFFFFF',
   },
+  
   inactiveText: {
     color: '#424242',
   },
