@@ -13,7 +13,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     const [batteryPercentage,setbatteryPercentage] = useState("");
     const [zone, setZone] = useState<number | null>(null);
     //const [host,setHost] = useState("");
-    const host = '10.45.1.13';
+    const host = '192.168.137.201';
     
     //const host = '10.45.1.14';
     //const host = '192.168.0.50'; //Joe - changed to work on my wifi
@@ -23,7 +23,8 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     //const [greenStatus,setgreenStatus] = useState(Boolean);
     //const [blueStatus, setblueStatus] = useState(Boolean);
     const [lowPowerMode, setLowPowerMode] = useState(false);
-    const base = '10.45.1.13';
+    //const base = '10.45.1.13';
+    const base = '192.168.137.201';
     //const device1 = '10.45.1.14';
     //const device2 = '10.45.1.15';
     //const device3 = '10.45.1.16';
