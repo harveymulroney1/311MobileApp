@@ -230,7 +230,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
     });
 
     const fetchLowPower = () => {
-        axios.get("http://" + host + "/getLowPower")
+        axios.get("http://" + host + "/getLowPower/"+deviceID)
             .then((response) => {
                 const now = new Date();
                 console.log("Low Power Mode", response.data, "Time:", now.getHours() + ":" + now.getMinutes());
@@ -383,7 +383,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
-                        axios.get("http://" + host + "/lowPowerModeOn")
+                        axios.get("http://" + host + "/lowPowerModeOn/"+deviceID)
                             .then((response) => {
                                 console.log("Enable low power response:", response.data);
                             })
@@ -397,7 +397,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
-                        axios.get("http://" + host + "/lowPowerModeOff")
+                        axios.get("http://" + host + "/lowPowerModeOff/"+deviceID)
                             .then((response) => {
                                 console.log("Disable low power response:", response.data);
                             })
@@ -411,7 +411,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
-                        axios.get("http://" + host + "/autoLowPowerModeOn")
+                        axios.get("http://" + host + "/autoLowPowerModeOn/"+deviceID)
                             .then((response) => {
                                 console.log("Enable automatic low power mode response:", response.data);
                             })
@@ -425,7 +425,7 @@ export default function deviceManager({deviceID}: {deviceID?: string}) {
                 <TouchableOpacity
                     style={styles.safeModeBtn}
                     onPress={() => {
-                        axios.get("http://" + host + "/autoLowPowerModeOff")
+                        axios.get("http://" + host + "/autoLowPowerModeOff/"+deviceID)
                             .then((response) => {
                                 console.log("Disable automatic low power mode response:", response.data);
                             })
